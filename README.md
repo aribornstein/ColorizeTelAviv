@@ -1,2 +1,0 @@
-# ColorizeTelAviv
-Created with CodeSandbox
