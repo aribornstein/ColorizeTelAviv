@@ -1,6 +1,3 @@
-// const  = await tf.loadLayersModel('./feat_extractor/model.json');
-// const model = await tf.loadLayersModel('./tfjs_color/model.json');
-
 function tensor_rgb2lab(rgb) {
   let a_con = tf.pow(rgb.add(0.055).div(1.055), 2.4);
   let b_con = rgb.div(12.92);
@@ -38,7 +35,6 @@ function tensor_rgb2lab(rgb) {
 }
 
 function tensor_lab2rgb(lab) {
-  // tf.tidy(() => {
   let [lab_l, lab_a, lab_b] = lab.split(3, 2),
     y = lab_l.add(16).div(116),
     x = lab_a.div(500).add(y),
@@ -85,7 +81,6 @@ function tensor_lab2rgb(lab) {
     .minimum(1)
     .mul(255)
     .maximum(0);
-  // });
 }
 
 function colorize(img_tensor, feat_extractor, model) {

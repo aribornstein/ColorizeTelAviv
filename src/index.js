@@ -1,59 +1,57 @@
-var http = require("http");
-var fs = require("fs");
-// var httpProxy = require("http-proxy");
+document.addEventListener("DOMContentLoaded", function() {
+  let imgList = document.getElementById("imgList"),
+    scrollRight = document.getElementById("scroll-right"),
+    scrollLeft = document.getElementById("scroll-left");
+  // When a user clicks on the right arrow, the ul will scroll 750px to the right
+  scrollRight.addEventListener("click", event => {
+    imgList.scrollBy(750, 0);
+  });
 
-var path = require("path");
+  // When a user clicks on the left arrow, the ul will scroll 750px to the left
+  scrollLeft.addEventListener("click", event => {
+    imgList.scrollBy(-750, 0);
+  });
 
-http
-  .createServer(function(request, response) {
-    console.log("request ", request.url);
+  async function main() {
+    const feat_extractor = await tf.loadLayersModel(
+      "https://cvworkshop.blob.core.windows.net/feat-extractor/model.json"
+    );
+    const model = await tf.loadLayersModel(
+      "https://cvworkshop.blob.core.windows.net/tfjs-color/model.json"
+    );
+    fetch(
+      "https://cvworkshop.blob.core.windows.net/telaviv-bw/?restype=container&comp=list"
+    )
+      .then(response => response.text())
+      .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
+      .then(xml => {
+        let blobList = Array.from(xml.querySelectorAll("Url")); //.getAttribute("Url");
+        blobList.forEach(async entry => {
+          let li_entry = document.createElement("li"),
+            img = document.createElement("img");
+          img.onload = async () => {
+            let canvas = document.createElement("canvas");
+            canvas.width = 224;
+            canvas.height = 224;
+            let img_tensor = tf.browser.fromPixels(img).toFloat(),
+              rgb_img = tf.tidy(() => {
+                return colorize(img_tensor, feat_extractor, model);
+              });
 
-    var filePath = "." + request.url;
-    if (filePath == "./") {
-      filePath = "./src/car.html";
-    }
+            await tf.browser.toPixels(rgb_img.div(255), canvas);
 
-    var extname = String(path.extname(filePath)).toLowerCase();
-    var mimeTypes = {
-      ".html": "text/html",
-      ".js": "text/javascript",
-      ".css": "text/css",
-      ".json": "application/json",
-      ".png": "image/png",
-      ".jpg": "image/jpg",
-      ".gif": "image/gif",
-      ".wav": "audio/wav",
-      ".mp4": "video/mp4",
-      ".woff": "application/font-woff",
-      ".ttf": "application/font-ttf",
-      ".eot": "application/vnd.ms-fontobject",
-      ".otf": "application/font-otf",
-      ".svg": "application/image/svg+xml"
-    };
+            img.src = canvas.toDataURL();
+            img.onload = null;
+          };
+          img.crossOrigin = "Anonymous";
+          img.src = entry.innerHTML;
+          li_entry.appendChild(img);
+          imgList.appendChild(li_entry);
+        });
+      });
+  }
 
-    var contentType = mimeTypes[extname] || "application/octet-stream";
-
-    fs.readFile(filePath, function(error, content) {
-      if (error) {
-        if (error.code == "ENOENT") {
-          fs.readFile("./404.html", function(error, content) {
-            response.writeHead(200, { "Content-Type": contentType });
-            response.end(content, "utf-8");
-          });
-        } else {
-          response.writeHead(500);
-          response.end(
-            "Sorry, check with the site admin for error: " +
-              error.code +
-              " ..\n"
-          );
-          response.end();
-        }
-      } else {
-        response.writeHead(200, { "Content-Type": contentType });
-        response.end(content, "utf-8");
-      }
-    });
-  })
-  .listen(8080);
-console.log("Server running at http://127.0.0.1:8125/");
+  tf.tidy(() => {
+    main();
+  });
+});
