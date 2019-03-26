@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", function() {
             await tf.browser.toPixels(rgb_img.div(255), canvas);
 
             img.src = canvas.toDataURL();
+            // document.removeChild(canvas);
             img.onload = null;
           };
           img.crossOrigin = "Anonymous";

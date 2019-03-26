@@ -84,14 +84,15 @@ function tensor_lab2rgb(lab) {
 }
 
 function colorize(img_tensor, feat_extractor, model) {
-  let resize_tensor = tf.image.resizeNearestNeighbor(img_tensor, [224, 224]),
+  let resize_tensor = tf.tidy(() => {return tf.image.resizeNearestNeighbor(img_tensor, [224, 224])}),
     // convert img greyscale and extract mobilnet features
     grey_tensor = resize_tensor.div(255).mean(2),
     grey_scale = tf.stack([grey_tensor, grey_tensor, grey_tensor], 2);
-  grey_tensor = grey_scale
+    grey_tensor = grey_scale
     .mul(255)
     .div(127.5)
     .sub(1);
+    
   const features = tf.tidy(() => {
     return feat_extractor
       .predict(grey_tensor.expandDims())

@@ -1,3 +1,9 @@
+html {
+  height: 100%;
+  background-image: url("https://cvworkshop.blob.core.windows.net/colorta/img/background.jpg") !important;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
 section {
   text-align: center;
   margin-top: 2.5%;
@@ -11,8 +17,10 @@ section {
   padding: 0;
   margin: 0;
   opacity: 0.5;
-  font-size: 34px;
+  font-weight: bolder;
+  font-size: 100px;
   transition: 0.2s;
+  color: #54c4e4;
 }
 .scroll-arrow:hover {
   transition: 0.2s;
@@ -48,6 +56,10 @@ li,
 img {
   width: 224px;
   height: 224px;
+}
+#title{
+  width:100%;
+  height: 100%;
 }
 li:hover {
   transition: 0.2s;
